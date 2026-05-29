@@ -1,6 +1,6 @@
 # Wildfire Impact: Latakia, Syria - 2025
 
-![alt text](image.png)
+![alt text](qastal_maaf_before_after_now.png "Before/After/Now Sentinel-2 RGB composites")
 
 This repository analyzes wildfire impacts in Latakia, Syria using:
 
