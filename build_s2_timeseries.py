@@ -182,39 +182,39 @@ class BuildS2TimeSeries:
         # get NDVI time series
         ndvi = SpectralIndices.calc_ndvi(nir_masked, red_masked)
 
-        ndvi_mean_ts = ndvi.resample(time="MS").mean().interp(method='nearest')
-        spec_indices_ts.append(ndvi_mean_ts)
+        ndvi_median_ts = ndvi.resample(time="MS").median().interp(method='nearest')
+        spec_indices_ts.append(ndvi_median_ts)
        
         # Bare Soil Index (BSI)        
         bsi = SpectralIndices.calc_bsi(swir1_masked, red_masked, nir_masked, blue_masked)
         
-        bsi_mean_ts = bsi.resample(time="MS").mean().interp(method='nearest')
-        spec_indices_ts.append(bsi_mean_ts)
+        bsi_median_ts = bsi.resample(time="MS").median().interp(method='nearest')
+        spec_indices_ts.append(bsi_median_ts)
         
         # Normalized Difference Moisture Index (NDMI)
         ndmi = SpectralIndices.calc_ndmi(swir1_masked, nir_masked)
-        ndmi_mean_ts = ndmi.resample(time="MS").mean().interp(method='nearest')
-        spec_indices_ts.append(ndmi_mean_ts)
+        ndmi_median_ts = ndmi.resample(time="MS").median().interp(method='nearest')
+        spec_indices_ts.append(ndmi_median_ts)
 
 
         # Normalized Burn Ratio (NBR)
         nbr = SpectralIndices.calc_nbr(swir2_masked, nir_masked)
-        nbr_mean_ts = nbr.resample(time="MS").mean().interp(method='nearest')
-        spec_indices_ts.append(nbr_mean_ts)
+        nbr_median_ts = nbr.resample(time="MS").median().interp(method='nearest')
+        spec_indices_ts.append(nbr_median_ts)
 
         ndvi_ts, bsi_ts, ndmi_ts, nbr_ts = dask.compute(
-            ndvi_mean_ts,
-            bsi_mean_ts,
-            ndmi_mean_ts,
-            nbr_mean_ts,
+            ndvi_median_ts,
+            bsi_median_ts,
+            ndmi_median_ts,
+            nbr_median_ts,
             scheduler="threads",
             num_workers=4,
             threads_per_worker=2
         )
 
-        monthly_red = (red_masked.resample(time="MS").mean().interp(method='nearest') * 1e-4).clip(0, 1)
-        monthly_green = (green_masked.resample(time="MS").mean().interp(method='nearest') * 1e-4).clip(0, 1)
-        monthly_blue = (blue_masked.resample(time="MS").mean().interp(method='nearest') * 1e-4).clip(0, 1)
+        monthly_red = (red_masked.resample(time="MS").median().interp(method='nearest') * 1e-4).clip(0, 1)
+        monthly_green = (green_masked.resample(time="MS").median().interp(method='nearest') * 1e-4).clip(0, 1)
+        monthly_blue = (blue_masked.resample(time="MS").median().interp(method='nearest') * 1e-4).clip(0, 1)
         ds_monthly = xarray.merge([monthly_red.rename("red"), 
                                 monthly_green.rename("green"), 
                                 monthly_blue.rename("blue")])        
