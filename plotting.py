@@ -73,6 +73,10 @@ def plot_index_time_series(input_dataset,
     ax[1].grid(alpha=0.3)
     ax[2].grid(alpha=0.3)
 
+    ax[0].set_title("Normalized Difference Vegetation Index (NDVI)", fontsize=12)
+    ax[1].set_title("Normalized Burn Ratio (NBR)", fontsize=12)
+    ax[2].set_title("Normalized Difference Moisture Index (NDMI)", fontsize=12)
+
     ax[0].spines[["top", "right"]].set_visible(False)
     ax[1].spines[["top", "right"]].set_visible(False)
     ax[2].spines[["top", "right"]].set_visible(False)
@@ -81,8 +85,7 @@ def plot_index_time_series(input_dataset,
     ax[1].ticklabel_format(style='plain', axis='both')
     ax[2].ticklabel_format(style='plain', axis='both')
 
-    
-    fig.suptitle(f"Time Series of NDVI, NBR, and NDMI for {aoi_name}")
+    fig.suptitle(f"Time Series of Spectral Indices for {aoi_name}")
     plt.tight_layout()
     plt.show()
 
