@@ -4,8 +4,8 @@
 from duckdb import df
 import numpy as np
 import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
 import pandas as pd
-import matplotlib.pyplot as plt
 import seaborn as sns
 
 
@@ -58,7 +58,7 @@ def plot_index_time_series(input_dataset,
                           aoi_name: str):
     """Plot 3 subplots of the time series for the specified spectral index."""
 
-    fig, ax = plt.subplots(3, 1, figsize=(8, 9), sharex=True)
+    fig, ax = plt.subplots(3, 1, figsize=(7, 9), sharex=True)
 
     ndvi_ts = input_dataset[spec_index[0]].mean(dim=['x', 'y'])
     ndvi_ts.plot(ax=ax[0], linestyle='-', lw=2, color='forestgreen')
@@ -81,14 +81,12 @@ def plot_index_time_series(input_dataset,
     ax[1].spines[["top", "right"]].set_visible(False)
     ax[2].spines[["top", "right"]].set_visible(False)
 
-    ax[0].ticklabel_format(style='plain', axis='both')
-    ax[1].ticklabel_format(style='plain', axis='both')
-    ax[2].ticklabel_format(style='plain', axis='both')
 
     fig.suptitle(f"Time Series of Spectral Indices for {aoi_name}")
     plt.tight_layout()
     plt.show()
 
+#===================================
 
 def plot_rgb_before_after_now(input_dataset, 
                               before_date, 
@@ -106,20 +104,24 @@ def plot_rgb_before_after_now(input_dataset,
     composite.sel(time=before_date).to_array().plot.imshow(robust=True,
                                                         add_colorbar=False, 
                                                         ax=ax[0])
-    ax[0].set_title("Before Fire")
-    ax[0].ticklabel_format(style='plain', axis='both')
+    ax[0].set_title(f"Pre-Fire - {before_date.strftime('%b %Y')}")
+
+    ax[0].xaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
+    ax[0].yaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
 
     composite.sel(time=after_date).to_array().plot.imshow(robust=True,
                                                         add_colorbar=False, 
                                                         ax=ax[1])
-    ax[1].set_title("After Fire")
-    ax[1].ticklabel_format(style='plain', axis='both')
+    ax[1].set_title(f"Post-Fire - {after_date.strftime('%b %Y')}")
+    ax[1].xaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
+    ax[1].yaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
 
     composite.sel(time=now_date).to_array().plot.imshow(robust=True, 
                                                         add_colorbar=False,
                                                         ax=ax[2])
-    ax[2].set_title("Now")
-    ax[2].ticklabel_format(style='plain', axis='both')
+    ax[2].set_title(f"Current - {now_date.strftime('%b %Y')}")
+    ax[2].xaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
+    ax[2].yaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
 
     plt.tight_layout()
     plt.show()
@@ -128,6 +130,7 @@ def plot_rgb_before_after_now(input_dataset,
 # ====================================
 # --- Spectral index maps and histograms
 #=====================================
+
 def plot_index_before_after_now(input_dataset, 
                         spec_index,
                         cmap,
@@ -141,9 +144,13 @@ def plot_index_before_after_now(input_dataset,
     before, after, and now.
     """
 
-    _, ax = plt.subplots(2, 2, figsize=(13, 9))
+    _, ax = plt.subplots(2, 2, figsize=(13, 10))
 
     plt.suptitle(f"Qastal Maaf - {spec_index} Index", fontsize=16)
+
+    # Share axes across the three map subplots only
+    ax[0, 1].sharey(ax[0, 0])
+    ax[1, 0].sharex(ax[0, 0])
 
     # --- Spectral index slices ---
     before_index = input_dataset[spec_index].sel(time=before_date)
@@ -158,25 +165,35 @@ def plot_index_before_after_now(input_dataset,
         add_colorbar=True,
         ax=ax[0, 0]
     )
-    ax[0, 0].set_title("Before Fire")
+    ax[0, 0].set_title(f"Pre-Fire - {pd.to_datetime(before_date).strftime('%b %Y')}")
+    ax[0, 0].tick_params(axis='x', rotation=90)
+    ax[0, 0].xaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
+    ax[0, 0].yaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
 
     after_index.plot.imshow(
         cmap=cmap,
         vmin=range_min,
         vmax=range_max,
         add_colorbar=True,
-        ax=ax[0, 1]
+        ax=ax[1, 0]
     )
-    ax[0, 1].set_title("After Fire")
+    ax[1, 0].set_title(f"Post-Fire - {pd.to_datetime(after_date).strftime('%b %Y')}")
+    ax[1, 0].tick_params(axis='x', rotation=90)
+    ax[1, 0].xaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
+    ax[1, 0].yaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
 
     now_index.plot.imshow(
         cmap=cmap,
         vmin=range_min,
         vmax=range_max,
         add_colorbar=True,
-        ax=ax[1, 0]
+        ax=ax[0, 1]
     )
-    ax[1, 0].set_title("Now")
+    ax[0, 1].set_title(f"Current - {pd.to_datetime(now_date).strftime('%b %Y')}")
+    ax[0, 1].tick_params(axis='x', rotation=90)
+    ax[0, 1].xaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
+    ax[0, 1].yaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
+
 
     # --- Histogram values ---
     before_vals = before_index.values.ravel()
@@ -191,15 +208,23 @@ def plot_index_before_after_now(input_dataset,
     # --- Histogram subplot ---
     hist_ax = ax[1, 1]
 
-    hist_ax.hist(before_vals, bins=20, histtype='step', lw=2, color='#86B0BD', label='Pre-Fire')
-    hist_ax.hist(after_vals, bins=20, histtype='step', lw=2, color='#E2A16F', label='Post-Fire')
-    hist_ax.hist(now_vals, bins=20, histtype='stepfilled', alpha=0.2, lw=2, ec='k', color='#D1D3D4', label='Current')
+    hist_ax.hist(before_vals, bins=20, histtype='step', lw=2, 
+                 color="#89BD86", label='Pre-Fire')
+    hist_ax.hist(after_vals, bins=20, histtype='step', lw=2, 
+                 color="#D56850", label='Post-Fire')
+    hist_ax.hist(now_vals, bins=20, histtype='stepfilled', alpha=0.2, 
+                 lw=2, ec='k', 
+                 color='#D1D3D4', 
+                 hatch='//',
+                 label='Current')
+    hist_ax.spines[["top", "right", "left"]].set_visible(False)
 
     hist_ax.set_xlim(range_min, range_max)
     hist_ax.set_title(f"{spec_index} Distribution")
     hist_ax.set_xlabel(f"{spec_index} Value")
     hist_ax.set_ylabel("Pixel Count")
     hist_ax.legend()
+    hist_ax.grid(alpha=0.3)
 
     plt.tight_layout()
     plt.show()
