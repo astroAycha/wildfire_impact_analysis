@@ -104,7 +104,7 @@ def plot_rgb_before_after_now(input_dataset,
     composite.sel(time=before_date).to_array().plot.imshow(robust=True,
                                                         add_colorbar=False, 
                                                         ax=ax[0])
-    ax[0].set_title(f"Pre-Fire - {before_date.strftime('%b %Y')}")
+    ax[0].set_title(f"Pre-Fire - {pd.to_datetime(before_date).strftime('%b %Y')}")
 
     ax[0].xaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
     ax[0].yaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
@@ -112,14 +112,14 @@ def plot_rgb_before_after_now(input_dataset,
     composite.sel(time=after_date).to_array().plot.imshow(robust=True,
                                                         add_colorbar=False, 
                                                         ax=ax[1])
-    ax[1].set_title(f"Post-Fire - {after_date.strftime('%b %Y')}")
+    ax[1].set_title(f"Post-Fire - {pd.to_datetime(after_date).strftime('%b %Y')}")
     ax[1].xaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
     ax[1].yaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
 
     composite.sel(time=now_date).to_array().plot.imshow(robust=True, 
                                                         add_colorbar=False,
                                                         ax=ax[2])
-    ax[2].set_title(f"Current - {now_date.strftime('%b %Y')}")
+    ax[2].set_title(f"Current - {pd.to_datetime(now_date).strftime('%b %Y')}")
     ax[2].xaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
     ax[2].yaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
 
