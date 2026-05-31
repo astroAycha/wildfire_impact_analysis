@@ -228,3 +228,51 @@ def plot_index_before_after_now(input_dataset,
 
     plt.tight_layout()
     plt.show()
+
+    # ==================
+
+def plot_dnbr(dnbr):
+        """Plot the dNBR map and histogram with summary statistics."""
+
+        _, ax = plt.subplots(1, 2, figsize=(11, 4))
+        dnbr.plot(cmap='BrBG_r', vmin=-.5, vmax=1, ax=ax[0])
+        ax[0].set_title("dNBR Map")
+
+        ax[0].xaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
+        ax[0].yaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
+
+        vals = dnbr.values.flatten()
+
+        ax[1].hist(vals,
+                bins=30,
+                histtype='stepfilled',
+                lw=1,
+                ec='k',
+                alpha=0.3,
+                color="#9C8F69",
+                )
+        ax[1].set_title("dNBR Distribution")
+        ax[1].set_xlabel('dNBR')
+        ax[1].set_ylabel('Count')
+        ax[1].grid(alpha=0.3)
+        ax[1].spines[["top", "right", "left"]].set_visible(False)
+
+        mean_dnbr   = float(dnbr.mean(skipna=True))
+        median_dnbr = float(dnbr.median(skipna=True))
+        q25, q75    = np.nanquantile(vals, [0.25, 0.75])
+
+        ax[1].axvline(x=mean_dnbr, color="#535757",
+                      linestyle='-', lw=.5, label=f'Mean: {mean_dnbr:.2f}')
+        ax[1].axvline(x=median_dnbr, color="#A7630A", 
+                      linestyle='--', lw=.5, label=f'Median: {median_dnbr:.2f}')
+        ax[1].axvline(x=q25, color="#0AA7A7", 
+                      linestyle=':', lw=.5, label=f'Q25: {q25:.2f}')
+        ax[1].axvline(x=q75, color='#0AA7A7', 
+                      linestyle=':', lw=.5, label=f'Q75: {q75:.2f}')
+
+        ax[1].axvspan(q25, q75, alpha=0.1, color="#0AA7A7", label='IQR')
+
+        ax[1].legend(fontsize=8)
+
+        plt.tight_layout()
+        plt.show()
