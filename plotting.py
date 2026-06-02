@@ -10,12 +10,19 @@ import seaborn as sns
 
 
 def plot_firms_frp(input_df):
-    
+    """Plot the Fire Radiative Power (FRP) from the FIRMS dataset as a bar plot.
+    Parameters
+    ----------
+    input_df : pandas.DataFrame
+        DataFrame containing the FIRMS data with 'acq_date', 'frp', 
+        and 'confidence' columns
+    """
+
     input_df['acq_date'] = pd.to_datetime(input_df['acq_date'])
     filtered = input_df[input_df['acq_date'] >= "2025-07-01"].copy()
     filtered['date_only'] = filtered['acq_date'].dt.date
 
-    palette = {"l": "#87BAC3", "n": "#53629E", "h": "#473472"}
+    palette = {"l": "#DEC384", "n": "#DAA464", "h": "#767F9E"}
 
     # Aggregate FRP by date and confidence
     agg = (
@@ -45,8 +52,9 @@ def plot_firms_frp(input_df):
     ax.set_title("Fire Radiative Power over Time", fontsize=13)
     ax.set_xlabel("Acquisition Date")
     ax.set_ylabel("Average FRP (MW)")
+    ax.grid(alpha=0.3)
     ax.tick_params(axis='x', rotation=30)
-    ax.spines[["top", "right"]].set_visible(False)
+    ax.spines[["top", "right", "left"]].set_visible(False)
 
     plt.tight_layout()
     plt.show()
@@ -56,12 +64,22 @@ def plot_firms_frp(input_df):
 def plot_index_time_series(input_dataset, 
                           spec_index: list,
                           aoi_name: str):
-    """Plot 3 subplots of the time series for the specified spectral index."""
+    """Plot 3 subplots of the time series for the specified spectral index.
+    
+    Parameters
+    ----------
+    input_dataset : xarray.Dataset
+        Dataset containing the time series of the spectral indices
+    spec_index : list
+        List of spectral indices to plot
+    aoi_name : str
+        Name of the area of interest for the plot title
+    """
 
     fig, ax = plt.subplots(3, 1, figsize=(7, 9), sharex=True)
 
     ndvi_ts = input_dataset[spec_index[0]].mean(dim=['x', 'y'])
-    ndvi_ts.plot(ax=ax[0], linestyle='-', lw=2, color='forestgreen')
+    ndvi_ts.plot(ax=ax[0], linestyle='-', lw=12, color='forestgreen')
 
     nbr_ts = input_dataset[spec_index[1]].mean(dim=['x', 'y'])
     nbr_ts.plot(ax=ax[1], linestyle='-', lw=2, color='goldenrod')
@@ -94,6 +112,16 @@ def plot_rgb_before_after_now(input_dataset,
                               now_date):
     """
     make a 1x3 plot of the RGB composite for before, after, and now.
+    Parameters
+    ----------
+    input_dataset : xarray.Dataset
+        Dataset containing the time series of the spectral indices and bands    
+    before_date : str
+        Date for the "before" image in the format 'YYYY-MM-DD'
+    after_date : str
+        Date for the "after" image in the format 'YYYY-MM-DD'
+    now_date : str
+        Date for the "current" image in the format 'YYYY-MM-DD'
     """
 
     composite = input_dataset[['red', 'green', 'blue']]
@@ -142,6 +170,24 @@ def plot_index_before_after_now(input_dataset,
     """
     make a 2x2 plot of the spectral index maps and histograms for 
     before, after, and now.
+    Parameters
+    ----------
+    input_dataset : xarray.Dataset
+        Dataset containing the time series of the spectral indices and bands
+    spec_index : str
+        Name of the spectral index to plot
+    cmap : str
+        Colormap to use for the plots
+    before_date : str
+        Date for the "before" image in the format 'YYYY-MM-DD'
+    after_date : str
+        Date for the "after" image in the format 'YYYY-MM-DD'
+    now_date : str
+        Date for the "current" image in the format 'YYYY-MM-DD'
+    range_min : float
+        Minimum value for the color scale
+    range_max : float
+        Maximum value for the color scale
     """
 
     _, ax = plt.subplots(2, 2, figsize=(13, 10))
@@ -232,7 +278,12 @@ def plot_index_before_after_now(input_dataset,
     # ==================
 
 def plot_dnbr(dnbr):
-        """Plot the dNBR map and histogram with summary statistics."""
+        """Plot the dNBR map and histogram with summary statistics.
+        Parameters
+        ----------
+        dnbr : xarray.DataArray
+            DataArray containing the dNBR values
+        """
 
         _, ax = plt.subplots(1, 2, figsize=(11, 4))
         dnbr.plot(cmap='BrBG_r', vmin=-.5, vmax=1, ax=ax[0])
