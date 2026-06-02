@@ -76,16 +76,22 @@ def plot_index_time_series(input_dataset,
         Name of the area of interest for the plot title
     """
 
-    fig, ax = plt.subplots(3, 1, figsize=(7, 9), sharex=True)
+    fig, ax = plt.subplots(3, 1, figsize=(6, 6), sharex=True)
 
-    ndvi_ts = input_dataset[spec_index[0]].mean(dim=['x', 'y'])
-    ndvi_ts.plot(ax=ax[0], linestyle='-', lw=2, color='forestgreen')
+    ndvi_ts = input_dataset[spec_index[0]].mean(dim=['x', 'y']).interpolate_na(dim='time')
+    ndvi_ts.plot(ax=ax[0], linestyle='-', lw=1, color='forestgreen')
+    ndvi_ts.plot(ax=ax[0], marker='x', markersize=2, 
+                 linestyle='none', color='#535757')
 
-    nbr_ts = input_dataset[spec_index[1]].mean(dim=['x', 'y'])
-    nbr_ts.plot(ax=ax[1], linestyle='-', lw=2, color='goldenrod')
+    nbr_ts = input_dataset[spec_index[1]].mean(dim=['x', 'y']).interpolate_na(dim='time')
+    nbr_ts.plot(ax=ax[1], linestyle='-', lw=1, color='goldenrod')
+    nbr_ts.plot(ax=ax[1], marker='x', markersize=2, 
+                 linestyle='none', color='#535757')
 
-    ndmi_ts = input_dataset[spec_index[2]].mean(dim=['x', 'y'])
-    ndmi_ts.plot(ax=ax[2], linestyle='-', lw=2 , color='dodgerblue')
+    ndmi_ts = input_dataset[spec_index[2]].mean(dim=['x', 'y']).interpolate_na(dim='time')
+    ndmi_ts.plot(ax=ax[2], linestyle='-', lw=1, color='dodgerblue')
+    ndmi_ts.plot(ax=ax[2], marker='x', markersize=2, 
+                 linestyle='none', color='#535757')
 
     ax[0].grid(alpha=0.3)
     ax[1].grid(alpha=0.3)
@@ -95,12 +101,12 @@ def plot_index_time_series(input_dataset,
     ax[1].set_title("Normalized Burn Ratio (NBR)", fontsize=12)
     ax[2].set_title("Normalized Difference Moisture Index (NDMI)", fontsize=12)
 
-    ax[0].spines[["top", "right"]].set_visible(False)
-    ax[1].spines[["top", "right"]].set_visible(False)
-    ax[2].spines[["top", "right"]].set_visible(False)
+    ax[0].spines[["top", "right", "left"]].set_visible(False)
+    ax[1].spines[["top", "right", "left"]].set_visible(False)
+    ax[2].spines[["top", "right", "left"]].set_visible(False)
 
 
-    fig.suptitle(f"Time Series of Spectral Indices for {aoi_name}")
+    fig.suptitle(f"Spectral Indices for {aoi_name}")
     plt.tight_layout()
     plt.show()
 
