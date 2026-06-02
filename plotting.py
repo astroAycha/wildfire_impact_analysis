@@ -294,7 +294,7 @@ def plot_dnbr(dnbr):
     """
 
     _, ax = plt.subplots(1, 2, figsize=(11, 4))
-    dnbr.plot(cmap='BrBG_r', vmin=-.2, vmax=.5, ax=ax[0])
+    dnbr.plot(cmap='BrBG_r', vmin=-.3, vmax=1.1, ax=ax[0])
     ax[0].set_title("dNBR Map")
 
     ax[0].xaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
@@ -315,6 +315,7 @@ def plot_dnbr(dnbr):
     ax[1].set_ylabel('Count')
     ax[1].grid(alpha=0.3)
     ax[1].spines[["top", "right", "left"]].set_visible(False)
+    ax[1].set_xlim(-.3, 1.3)
 
     mean_dnbr   = float(dnbr.mean(skipna=True))
     median_dnbr = float(dnbr.median(skipna=True))
