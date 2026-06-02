@@ -9,7 +9,6 @@ import xarray
 import odc.stac
 import dask
 
-
 from calc_spec_indices import SpectralIndices
 
 from dotenv import load_dotenv
@@ -123,7 +122,7 @@ class BuildS2TimeSeries:
                             aoi_bbox: list,
                             aoi_name: str,
                             start_date: str,
-                            end_date: str) -> gpd.GeoDataFrame:
+                            end_date: str) -> xarray.Dataset:
         """
         Extract time series from the downloaded data
 
@@ -139,7 +138,9 @@ class BuildS2TimeSeries:
             End date of the time series in the format 'YYYY-MM-DD'
         Returns
         -------
-        geopandas dataframe with the datetime, indices, and geometry
+        xarray.Dataset
+            Dataset containing the time series of the spectral indices 
+            and the original bands
         
         Example
         --------
@@ -182,24 +183,24 @@ class BuildS2TimeSeries:
         # get NDVI time series
         ndvi = SpectralIndices.calc_ndvi(nir_masked, red_masked)
 
-        ndvi_median_ts = ndvi.resample(time="MS").median().interp(method='nearest')
+        ndvi_median_ts = ndvi.resample(time="W").median().interp(method='nearest')
         spec_indices_ts.append(ndvi_median_ts)
        
         # Bare Soil Index (BSI)        
         bsi = SpectralIndices.calc_bsi(swir1_masked, red_masked, nir_masked, blue_masked)
         
-        bsi_median_ts = bsi.resample(time="MS").median().interp(method='nearest')
+        bsi_median_ts = bsi.resample(time="W").median().interp(method='nearest')
         spec_indices_ts.append(bsi_median_ts)
         
         # Normalized Difference Moisture Index (NDMI)
         ndmi = SpectralIndices.calc_ndmi(swir1_masked, nir_masked)
-        ndmi_median_ts = ndmi.resample(time="MS").median().interp(method='nearest')
+        ndmi_median_ts = ndmi.resample(time="W").median().interp(method='nearest')
         spec_indices_ts.append(ndmi_median_ts)
 
 
         # Normalized Burn Ratio (NBR)
         nbr = SpectralIndices.calc_nbr(swir2_masked, nir_masked)
-        nbr_median_ts = nbr.resample(time="MS").median().interp(method='nearest')
+        nbr_median_ts = nbr.resample(time="W").median().interp(method='nearest')
         spec_indices_ts.append(nbr_median_ts)
 
         ndvi_ts, bsi_ts, ndmi_ts, nbr_ts = dask.compute(
@@ -212,12 +213,12 @@ class BuildS2TimeSeries:
             threads_per_worker=2
         )
 
-        monthly_red = (red_masked.resample(time="MS").median().interp(method='nearest') * 1e-4).clip(0, 1)
-        monthly_green = (green_masked.resample(time="MS").median().interp(method='nearest') * 1e-4).clip(0, 1)
-        monthly_blue = (blue_masked.resample(time="MS").median().interp(method='nearest') * 1e-4).clip(0, 1)
-        ds_monthly = xarray.merge([monthly_red.rename("red"), 
-                                monthly_green.rename("green"), 
-                                monthly_blue.rename("blue")])        
+        weekly_red = (red_masked.resample(time="W").median().interp(method='nearest') * 1e-4).clip(0, 1)
+        weekly_green = (green_masked.resample(time="W").median().interp(method='nearest') * 1e-4).clip(0, 1)
+        weekly_blue = (blue_masked.resample(time="W").median().interp(method='nearest') * 1e-4).clip(0, 1)
+        ds_weekly = xarray.merge([weekly_red.rename("red"), 
+                                weekly_green.rename("green"), 
+                                weekly_blue.rename("blue")])        
 
         indices_ds = xarray.merge([
             ndvi_ts.rename("NDVI"),
@@ -226,6 +227,6 @@ class BuildS2TimeSeries:
             nbr_ts.rename("NBR"),
         ])
 
-        output = xarray.merge([ds_monthly, indices_ds])
+        output = xarray.merge([ds_weekly, indices_ds])
 
         return output
