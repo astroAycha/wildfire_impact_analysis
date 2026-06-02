@@ -44,7 +44,10 @@ def get_ems_data():
 
     # sort by acquisition time and get the first one
     ems_gdf.sort_values("acquisition_time", inplace=True)
-    data_download_url = ems_gdf['download_path'].iloc[1]
+    data_download_url = ems_gdf['download_path'].iloc[8]
+    print(f"Downloading data from: {data_download_url}")
+    print(f"Acquisition time: {ems_gdf['acquisition_time'].iloc[8]}")
+    print(f"Sensor: {ems_gdf['sensor'].iloc[8]}")
 
     # download the data and extract it
     with open("product.zip", "wb") as f:
