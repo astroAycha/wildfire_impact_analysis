@@ -22,7 +22,7 @@ def plot_firms_frp(input_df):
     filtered = input_df[input_df['acq_date'] >= "2025-07-01"].copy()
     filtered['date_only'] = filtered['acq_date'].dt.date
 
-    palette = {"l": "#DEC384", "n": "#DAA464", "h": "#767F9E"}
+    palette = {"l": "#DEC384", "n": "#DAA464", "h": "#6F7BA6"}
 
     # Aggregate FRP by date and confidence
     agg = (
@@ -79,7 +79,7 @@ def plot_index_time_series(input_dataset,
     fig, ax = plt.subplots(3, 1, figsize=(7, 9), sharex=True)
 
     ndvi_ts = input_dataset[spec_index[0]].mean(dim=['x', 'y'])
-    ndvi_ts.plot(ax=ax[0], linestyle='-', lw=12, color='forestgreen')
+    ndvi_ts.plot(ax=ax[0], linestyle='-', lw=2, color='forestgreen')
 
     nbr_ts = input_dataset[spec_index[1]].mean(dim=['x', 'y'])
     nbr_ts.plot(ax=ax[1], linestyle='-', lw=2, color='goldenrod')
@@ -126,7 +126,7 @@ def plot_rgb_before_after_now(input_dataset,
 
     composite = input_dataset[['red', 'green', 'blue']]
 
-    _, ax = plt.subplots(1, 3, figsize=(12, 4), sharex=True)
+    _, ax = plt.subplots(1, 3, figsize=(12, 4), sharey=True)
     plt.suptitle("Qastal Maaf - RGB Composite")
 
     composite.sel(time=before_date).to_array().plot.imshow(robust=True,
@@ -143,6 +143,7 @@ def plot_rgb_before_after_now(input_dataset,
     ax[1].set_title(f"Post-Fire - {pd.to_datetime(after_date).strftime('%b %Y')}")
     ax[1].xaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
     ax[1].yaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
+    ax[1].sharey(ax[0])
 
     composite.sel(time=now_date).to_array().plot.imshow(robust=True, 
                                                         add_colorbar=False,
@@ -150,6 +151,7 @@ def plot_rgb_before_after_now(input_dataset,
     ax[2].set_title(f"Current - {pd.to_datetime(now_date).strftime('%b %Y')}")
     ax[2].xaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
     ax[2].yaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
+    ax[2].sharey(ax[0])
 
     plt.tight_layout()
     plt.show()
@@ -278,52 +280,52 @@ def plot_index_before_after_now(input_dataset,
     # ==================
 
 def plot_dnbr(dnbr):
-        """Plot the dNBR map and histogram with summary statistics.
-        Parameters
-        ----------
-        dnbr : xarray.DataArray
-            DataArray containing the dNBR values
-        """
+    """Plot the dNBR map and histogram with summary statistics.
+    Parameters
+    ----------
+    dnbr : xarray.DataArray
+        DataArray containing the dNBR values
+    """
 
-        _, ax = plt.subplots(1, 2, figsize=(11, 4))
-        dnbr.plot(cmap='BrBG_r', vmin=-.5, vmax=1, ax=ax[0])
-        ax[0].set_title("dNBR Map")
+    _, ax = plt.subplots(1, 2, figsize=(11, 4))
+    dnbr.plot(cmap='BrBG_r', vmin=-.2, vmax=.5, ax=ax[0])
+    ax[0].set_title("dNBR Map")
 
-        ax[0].xaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
-        ax[0].yaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
+    ax[0].xaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
+    ax[0].yaxis.set_major_formatter(mticker.StrMethodFormatter('{x:.0f}'))
 
-        vals = dnbr.values.flatten()
+    vals = dnbr.values.flatten()
 
-        ax[1].hist(vals,
-                bins=30,
-                histtype='stepfilled',
-                lw=1,
-                ec='k',
-                alpha=0.3,
-                color="#9C8F69",
-                )
-        ax[1].set_title("dNBR Distribution")
-        ax[1].set_xlabel('dNBR')
-        ax[1].set_ylabel('Count')
-        ax[1].grid(alpha=0.3)
-        ax[1].spines[["top", "right", "left"]].set_visible(False)
+    ax[1].hist(vals,
+            bins=30,
+            histtype='stepfilled',
+            lw=1,
+            ec='k',
+            alpha=0.3,
+            color="#9C8F69",
+            )
+    ax[1].set_title("dNBR Distribution")
+    ax[1].set_xlabel('dNBR')
+    ax[1].set_ylabel('Count')
+    ax[1].grid(alpha=0.3)
+    ax[1].spines[["top", "right", "left"]].set_visible(False)
 
-        mean_dnbr   = float(dnbr.mean(skipna=True))
-        median_dnbr = float(dnbr.median(skipna=True))
-        q25, q75    = np.nanquantile(vals, [0.25, 0.75])
+    mean_dnbr   = float(dnbr.mean(skipna=True))
+    median_dnbr = float(dnbr.median(skipna=True))
+    q25, q75    = np.nanquantile(vals, [0.25, 0.75])
 
-        ax[1].axvline(x=mean_dnbr, color="#535757",
-                      linestyle='-', lw=.5, label=f'Mean: {mean_dnbr:.2f}')
-        ax[1].axvline(x=median_dnbr, color="#A7630A", 
-                      linestyle='--', lw=.5, label=f'Median: {median_dnbr:.2f}')
-        ax[1].axvline(x=q25, color="#0AA7A7", 
-                      linestyle=':', lw=.5, label=f'Q25: {q25:.2f}')
-        ax[1].axvline(x=q75, color='#0AA7A7', 
-                      linestyle=':', lw=.5, label=f'Q75: {q75:.2f}')
+    ax[1].axvline(x=mean_dnbr, color="#535757",
+                    linestyle='-', lw=.5, label=f'Mean: {mean_dnbr:.2f}')
+    ax[1].axvline(x=median_dnbr, color="#A7630A", 
+                    linestyle='--', lw=.5, label=f'Median: {median_dnbr:.2f}')
+    ax[1].axvline(x=q25, color="#0AA7A7", 
+                    linestyle=':', lw=.5, label=f'Q25: {q25:.2f}')
+    ax[1].axvline(x=q75, color='#0AA7A7', 
+                    linestyle=':', lw=.5, label=f'Q75: {q75:.2f}')
 
-        ax[1].axvspan(q25, q75, alpha=0.1, color="#0AA7A7", label='IQR')
+    ax[1].axvspan(q25, q75, alpha=0.1, color="#0AA7A7", label='IQR')
 
-        ax[1].legend(fontsize=8)
+    ax[1].legend(fontsize=8)
 
-        plt.tight_layout()
-        plt.show()
+    plt.tight_layout()
+    plt.show()
