@@ -2,6 +2,7 @@
 
 
 from duckdb import df
+import folium
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
@@ -336,3 +337,68 @@ def plot_dnbr(dnbr):
 
     plt.tight_layout()
     plt.show()
+
+
+#====================
+# burn perimeter map
+#====================
+
+def plot_burn_perimeter_map(aoi_gdf, burn_perimeter, burn_perimeter_clipped):
+    """Plot the burn perimeter and AOI on an interactive map using Folium.
+    Parameters
+    ----------
+    aoi_gdf : geopandas.GeoDataFrame
+        GeoDataFrame containing the geometry of the area of interest (AOI)
+    burn_perimeter : geopandas.GeoDataFrame
+        GeoDataFrame containing the geometry of the burn perimeter
+    burn_perimeter_clipped : geopandas.GeoDataFrame
+        GeoDataFrame containing the geometry of the burn perimeter clipped to the AOI
+    """
+
+    m = folium.Map(location=[35.85, 35.95],
+                zoom_start=12)
+
+    # Add basemap
+    folium.TileLayer(
+        tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        attr="Esri",
+        name="Esri World Imagery",
+        overlay=False,
+        control=True
+    ).add_to(m)
+
+    folium.GeoJson(aoi_gdf,
+                name="AOI",
+            style_function=lambda x: {
+            "color": "orchid",
+            "fillOpacity": 0.05,
+            "weight": 2
+        }).add_to(m)
+
+    folium.GeoJson(
+        burn_perimeter,
+        name="Burn Perimeter",
+        style_function=lambda x: {
+            "color": "aquamarine",
+            "fillOpacity": 0.1,
+            "weight": 2,
+            "dashArray": "5, 5"
+        }
+    ).add_to(m)
+
+    folium.GeoJson(
+        burn_perimeter_clipped,
+        name="Burn Perimeter Clipped",
+        style_function=lambda x: {
+            "color": "gold",
+            "fillOpacity": 0.1,
+            "weight": 2,
+            "dashArray": "5, 5"
+        }
+    ).add_to(m)
+
+    # Add layer control (top right)
+    folium.LayerControl(position='topright', collapsed=False).add_to(m)
+
+    map_path = "burn_perimeter_map.html"
+    m.save(map_path)
