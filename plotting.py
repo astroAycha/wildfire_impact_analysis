@@ -400,7 +400,7 @@ def plot_burn_perimeter_map(aoi_gdf, burn_perimeter, burn_perimeter_clipped):
     # Add layer control (top right)
     folium.LayerControl(position='topright', collapsed=False).add_to(m)
 
-    map_path = "burn_perimeter_map.html"
+    map_path = "./maps/burn_perimeter_map.html"
     m.save(map_path)
 
 #=====================
@@ -493,5 +493,5 @@ def plot_comparison_map(burned_ref,
 
     folium.LayerControl().add_to(m)
 
-    map_path = "comparison_map.html"
+    map_path = "./maps/comparison_map.html"
     m.save(map_path)
