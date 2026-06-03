@@ -22,7 +22,7 @@ def plot_firms_frp(input_df):
     filtered = input_df[input_df['acq_date'] >= "2025-07-01"].copy()
     filtered['date_only'] = filtered['acq_date'].dt.date
 
-    palette = {"l": "#DEC384", "n": "#DAA464", "h": "#6F7BA6"}
+    palette = {"l": "#EFD9D1", "n": "#D8AC9C", "h": "#999B84"}
 
     # Aggregate FRP by date and confidence
     agg = (
@@ -36,7 +36,7 @@ def plot_firms_frp(input_df):
     # Preserve chronological order
     date_order = agg.sort_values('date_only')['date_str'].unique().tolist()
 
-    _, ax = plt.subplots(figsize=(12, 5))
+    _, ax = plt.subplots(figsize=(9, 4))
 
     sns.barplot(
         data=agg,
