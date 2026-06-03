@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import pandas as pd
 import seaborn as sns
+import geopandas as gpd
 
 
 def plot_firms_frp(input_df):
@@ -413,13 +414,9 @@ def plot_comparison_map(burned_ref,
                         aoi_utm):
 
     inside_polygon = burned_ref == 1
-
     classified_as_burned = (burn_class_clipped.values == 1) 
-
-    # mask out NaN pixels from burn_class if any
     valid = ~np.isnan(burn_class_clipped.values)
 
-    # Visualize agreement
     comparison = np.full_like(burned_ref, np.nan, dtype=float)
     comparison[inside_polygon & classified_as_burned & valid] = 1   # True positive
     comparison[inside_polygon & ~classified_as_burned & valid] = 2  # False negative (missed)
@@ -427,7 +424,6 @@ def plot_comparison_map(burned_ref,
 
     from rasterio.features import shapes
     from shapely.geometry import shape
-    import pandas as pd
 
     def raster_to_geodataframe(array, transform, crs, value_col="value"):
         mask = ~np.isnan(array.astype(float))
@@ -448,31 +444,37 @@ def plot_comparison_map(burned_ref,
     color_map  = {1.0: "#76d1f2",       2.0: "#f0ea7c",        3.0: "#ed855f"}
     comparison_gdf["label"] = comparison_gdf["value"].map(label_map)
     comparison_gdf["color"] = comparison_gdf["value"].map(color_map)
-
     comparison_gdf_4326 = comparison_gdf.to_crs("EPSG:4326")
 
     m = folium.Map(location=[35.825, 35.95], zoom_start=13)
     folium.TileLayer(
-    tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-    attr="Esri", name="Esri World Imagery"
+        tiles="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+        attr="Esri", name="Esri World Imagery"
     ).add_to(m)
 
-    # Classification layer (vectorized comparison)
-    folium.GeoJson(
-        comparison_gdf_4326,
-        name="Classification",
-        style_function=lambda x: {
-            "fillColor": x["properties"]["color"],
-            "color": "none",
-            "fillOpacity": 0.6,
-            "weight": 0
-        }
-    ).add_to(m)
+    # --- One FeatureGroup per classification class ---
+    for value, label in label_map.items():
+        color = color_map[value]
+        subset = comparison_gdf_4326[comparison_gdf_4326["value"] == value]
+        if subset.empty:
+            continue
 
-    # Burn perimeter on top
+        fg = folium.FeatureGroup(name=f'<span style="color:{color}">&#9632;</span> {label}')
+        folium.GeoJson(
+            subset,
+            style_function=lambda x, c=color: {
+                "fillColor": c,
+                "color": "none",
+                "fillOpacity": 0.6,
+                "weight": 0
+            }
+        ).add_to(fg)
+        fg.add_to(m)
+
+    # Burn perimeter
     folium.GeoJson(
         burn_perimeter_clipped.to_crs("EPSG:4326"),
-        name="Burn Perimeter",
+        name="Burn Perimeter (EMS)",
         style_function=lambda x: {
             "color": "white",
             "fillOpacity": 0.0,
@@ -491,7 +493,7 @@ def plot_comparison_map(burned_ref,
         }
     ).add_to(m)
 
-    folium.LayerControl().add_to(m)
+    folium.LayerControl(collapsed=False).add_to(m)
 
     map_path = "./maps/comparison_map.html"
     m.save(map_path)
