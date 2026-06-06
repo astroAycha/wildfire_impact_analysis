@@ -1,0 +1,17 @@
+format:
+  html:
+    theme:
+      light: flatly
+      dark: darkly
+    respect-user-color-scheme: true
+    toc: true
+    toc-title: "Table of Contents"
+    toc-depth: 4
+    code-fold: false
+    self-contained: false
+
+    include-before-body:
+      - includes/tutorial-banner.html
+
+css:
+  - includes/tutorial-banner.css

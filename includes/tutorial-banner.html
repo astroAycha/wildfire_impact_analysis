@@ -1,0 +1,93 @@
+<div class="tutorial-banner">
+  <span>
+    <i class="bi bi-journal-text"></i>
+    Explore the project:
+  </span>
+
+  <a id="github-link" href="https://github.com/astroAycha/wildfire_impact_analysis" target="_blank" rel="noopener noreferrer">
+    <i class="bi bi-github"></i>
+    View Source on GitHub
+  </a>
+
+  <span class="separator">·</span>
+
+  <a id="download-link" href="#" rel="noopener noreferrer">
+    <i class="bi bi-download"></i>
+    Download Notebook
+  </a>
+
+  <span class="separator">·</span>
+
+  <button id="theme-toggle" class="theme-toggle" aria-label="Toggle dark/light mode">
+    <i class="bi bi-moon-stars-fill" id="theme-icon"></i>
+    <span id="theme-label">Dark mode</span>
+  </button>
+</div>
+
+<script>
+(function() {
+  var btn = document.getElementById('theme-toggle');
+  var icon = document.getElementById('theme-icon');
+  var label = document.getElementById('theme-label');
+
+  function isDark() {
+    // Quarto may signal dark mode via data-bs-theme attribute or a body class
+    return document.documentElement.getAttribute('data-bs-theme') === 'dark'
+      || document.body.classList.contains('quarto-dark');
+  }
+
+  function syncTheme() {
+    if (isDark()) {
+      icon.className = 'bi bi-sun-fill';
+      label.textContent = 'Light mode';
+    } else {
+      icon.className = 'bi bi-moon-stars-fill';
+      label.textContent = 'Dark mode';
+    }
+  }
+
+  btn.addEventListener('click', function() {
+    // Try Quarto's built-in toggle first
+    var quartoBtn = document.querySelector('.quarto-color-scheme-toggle');
+    if (quartoBtn) {
+      quartoBtn.click();
+    } else {
+      // Fallback: toggle data-bs-theme directly
+      var next = isDark() ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-bs-theme', next);
+    }
+    // Sync after a short delay to let Quarto apply the change
+    setTimeout(syncTheme, 100);
+  });
+
+  // Sync whenever Quarto changes the attribute or body class
+  var observer = new MutationObserver(syncTheme);
+  function startObserving() {
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-bs-theme', 'class'] });
+    observer.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    syncTheme();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startObserving);
+  } else {
+    startObserving();
+  }
+})();
+
+document.getElementById('download-link').addEventListener('click', function(e) {
+  e.preventDefault();
+  fetch('https://raw.githubusercontent.com/astroAycha/wildfire_impact_analysis/main/wildfire_impact_latakia.ipynb')
+    .then(function(r) { return r.blob(); })
+    .then(function(blob) {
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement('a');
+      a.href = url;
+      a.download = 'wildfire_impact_latakia.ipynb';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    });
+});
+</script>
