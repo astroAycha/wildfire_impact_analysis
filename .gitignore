@@ -1,0 +1,8 @@
+.env
+
+/.quarto/
+**/*.quarto_ipynb
+
+ems_data/
+__pycache__/
+wildfire_impact_latakia_files/
